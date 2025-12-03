@@ -1,0 +1,117 @@
+{% extends "base.html" %}
+{% block title %}Dashboard — SmartRecruit{% endblock %}
+{% block content %}
+
+<div class="dashboard-container">
+
+    <h1 class="dash-title">Your Performance Dashboard</h1>
+
+    <!-- Stats / KPI Cards -->
+    <div class="stats-grid">
+        <div class="stat-card">
+            <h3>Total Answers</h3>
+            <p id="total-answers">0</p>
+        </div>
+
+        <div class="stat-card">
+            <h3>Streak</h3>
+            <p id="streak">0</p>
+        </div>
+
+        <div class="stat-card">
+            <h3>Total Points</h3>
+            <p id="points">0</p>
+        </div>
+
+        <div class="stat-card">
+            <h3>Avg Score</h3>
+            <p id="avg-score">0</p>
+        </div>
+
+        <div class="stat-card">
+            <h3>Avg Sentiment</h3>
+            <p id="avg-sent">0</p>
+        </div>
+    </div>
+
+    <!-- Charts -->
+    <div class="chart-section">
+        <div class="chart-card">
+            <h3>Score Trend</h3>
+            <canvas id="scoreChart"></canvas>
+        </div>
+
+        <div class="chart-card">
+            <h3>Sentiment Trend</h3>
+            <canvas id="sentChart"></canvas>
+        </div>
+
+        <div class="chart-card">
+            <h3>Keyword Usage</h3>
+            <canvas id="keywordChart"></canvas>
+        </div>
+    </div>
+
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", async () => {
+    const userId = "{{ user_id }}";
+
+    const res = await fetch(`/get_progress/${userId}`);
+    const data = await res.json();
+
+    if (data.status !== "success") return;
+
+    document.getElementById("total-answers").textContent = data.total_answers;
+    document.getElementById("streak").textContent = data.streak;
+    document.getElementById("points").textContent = data.points;
+
+    const avgScore = (data.scores.reduce((a,b)=>a+b,0) / data.scores.length || 0).toFixed(2);
+    const avgSent = (data.sentiment.reduce((a,b)=>a+b,0) / data.sentiment.length || 0).toFixed(2);
+
+    document.getElementById("avg-score").textContent = avgScore;
+    document.getElementById("avg-sent").textContent = avgSent;
+
+    // SCORE CHART
+    new Chart(document.getElementById("scoreChart"), {
+        type: "line",
+        data: {
+            labels: data.scores.map((_,i)=>`Q${i+1}`),
+            datasets: [{
+                label: "Score",
+                data: data.scores,
+                borderWidth: 2
+            }]
+        }
+    });
+
+    // SENTIMENT CHART
+    new Chart(document.getElementById("sentChart"), {
+        type: "line",
+        data: {
+            labels: data.sentiment.map((_,i)=>`Q${i+1}`),
+            datasets: [{
+                label: "Sentiment",
+                data: data.sentiment,
+                borderWidth: 2
+            }]
+        }
+    });
+
+    // KEYWORD COUNT CHART
+    new Chart(document.getElementById("keywordChart"), {
+        type: "bar",
+        data: {
+            labels: data.keyword_counts.map((_,i)=>`Q${i+1}`),
+            datasets: [{
+                label: "Keywords Used",
+                data: data.keyword_counts,
+                borderWidth: 2
+            }]
+        }
+    });
+});
+</script>
+
+{% endblock %}

@@ -1,0 +1,17 @@
+
+{% extends "base.html" %}
+{% block content %}
+
+<div class="loading-container">
+    <div class="loader"></div>
+    <p class="loading-text">Generating feedback…</p>
+
+    <!-- Auto redirect -->
+    <script>
+        setTimeout(() => {
+            window.location.href = "{{ next_url }}";
+        }, 2000);
+    </script>
+</div>
+
+{% endblock %}
