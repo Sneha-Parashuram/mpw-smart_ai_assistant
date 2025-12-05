@@ -60,20 +60,35 @@ function attachToggle() {
             signup.style.display = "block";
             signin.style.display = "none";
 
+            // ADD required to signup fields
+            document.querySelectorAll("#signup-fields input")
+                .forEach(x => x.setAttribute("required", "true"));
+
+            // REMOVE required from signin fields
+            document.querySelectorAll("#signin-fields input")
+                .forEach(x => x.removeAttribute("required"));
+
             text.innerHTML = `Already have an account? <a href="#" id="toggle-link">Sign In</a>`;
         } else {
             action.value = "signin";
             signup.style.display = "none";
             signin.style.display = "block";
 
+            document.querySelectorAll("#signin-fields input")
+                .forEach(x => x.setAttribute("required", "true"));
+
+            document.querySelectorAll("#signup-fields input")
+                .forEach(x => x.removeAttribute("required"));
+
             text.innerHTML = `Don’t have an account? <a href="#" id="toggle-link">Sign Up</a>`;
         }
 
-        attachToggle(); 
+        attachToggle();
     });
 }
 attachToggle();
 </script>
+
 
 <!-- --------------------------------
      PREMIUM BLUE GLASSMORPHISM THEME
