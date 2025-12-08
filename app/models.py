@@ -22,6 +22,8 @@ class User(db.Model):
     points = db.Column(db.Integer, default=0)
 
     last_answered = db.Column(db.String(20))
+    profile_photo = db.Column(db.String(200), default=None)
+
 
 
 class Progress(db.Model):
@@ -35,5 +37,20 @@ class Progress(db.Model):
 
     score = db.Column(db.Float, default=0)
     sentiment = db.Column(db.Float, default=0)
+
+    timestamp = db.Column(db.DateTime, default=datetime.utcnow)
+
+class MockProgress(db.Model):
+    __tablename__ = "mock_progress"
+
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey("user.id"))
+    question_id = db.Column(db.String(20))
+
+    answer = db.Column(db.Text)
+    feedback_text = db.Column(db.Text)
+    score = db.Column(db.Float)
+    sentiment = db.Column(db.Float)
+    keywords = db.Column(db.String(200))
 
     timestamp = db.Column(db.DateTime, default=datetime.utcnow)

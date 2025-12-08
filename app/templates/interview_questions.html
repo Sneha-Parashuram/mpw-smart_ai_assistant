@@ -2,91 +2,277 @@
 {% block title %}Interview Practice — SmartRecruit LLM{% endblock %}
 
 {% block content %}
-<div class="card">
-  <h1 class="page-title">Interview Practice</h1>
 
-  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
-    <div style="display:flex;gap:12px;align-items:center">
-      <button id="randBtn" class="btn">Get Random Question</button>
-      <small style="color:var(--muted)">Tip: Practice different questions daily</small>
+<div class="glass-wrapper">
+
+    <div class="glass-card interview-card">
+
+        <h1 class="page-title practice-title">Interview Practice</h1>
+        <p class="subtitle practice-subtitle">Choose company, round & difficulty to begin</p>
+
+        <!-- FILTERS -->
+        <div class="selector-row">
+
+            <select id="company" class="glass-select">
+                <option value="" disabled selected>Select Company</option>
+                <option value="Google">Google</option>
+                <option value="Amazon">Amazon</option>
+                <option value="Microsoft">Microsoft</option>
+                <option value="Meta">Meta</option>
+                <option value="Apple">Apple</option>
+                <option value="Infosys">Infosys</option>
+                <option value="TCS">TCS</option>
+                <option value="Wipro">Wipro</option>
+                <option value="Accenture">Accenture</option>
+                <option value="Cognizant">Cognizant</option>
+            </select>
+
+            <select id="round_type" class="glass-select">
+                <option value="" disabled selected>Select Round</option>
+                <option value="technical">Technical Round</option>
+                <option value="hr">HR Round</option>
+            </select>
+
+            <select id="difficulty" class="glass-select">
+                <option value="" disabled selected>Difficulty</option>
+                <option value="easy">Easy</option>
+                <option value="medium">Medium</option>
+                <option value="hard">Hard</option>
+            </select>
+
+            <button id="getQuestionBtn" class="glass-btn accent">Get Question</button>
+        </div>
+
+        <!-- QUESTION + ANSWER SECTION -->
+        <div id="questionBlock">
+
+            <h2 id="questionText" class="question-text practice-highlight">
+                Choose filters & click <b>Get Question</b>
+            </h2>
+
+            <textarea id="answerInput" class="glass-input-area"
+                placeholder="Type your answer here..."></textarea>
+
+            <div class="action-row">
+                <button id="submitAnswerBtn" class="glass-btn">Submit Answer</button>
+                <div id="saving" class="saving" style="display:none">Saving...</div>
+            </div>
+
+            <div id="feedbackArea" class="feedback-box" style="display:none"></div>
+
+        </div>
+
     </div>
-    <div>
-      <a href="/progress/1" class="btn small">View Progress</a>
-    </div>
-  </div>
-
-  <div id="questionBlock">
-    <h2 id="questionText" style="color:var(--accent-2)">Click <strong>Get Random Question</strong></h2>
-    <textarea id="answerBox" placeholder="Type your answer here..."></textarea>
-
-    <div style="display:flex;gap:12px;margin-top:12px;align-items:center">
-      <button id="subBtn" class="btn">Submit Answer</button>
-      <div id="saving" style="color:var(--muted);font-size:14px;display:none">Saving...</div>
-    </div>
-
-    <div id="feedbackArea" class="feedback" style="display:none"></div>
-  </div>
 </div>
+
 {% endblock %}
+
 
 {% block scripts %}
 <script>
+
 let currentQuestion = null;
 
-async function getQuestion(){
-  document.getElementById("questionText").innerText = "Loading question...";
-  const res = await fetch("/get_question");
-  const data = await res.json();
-  if (data && data.status === "success") {
-    currentQuestion = data;
-    document.getElementById("questionText").innerText = data.question;
-    document.getElementById("answerBox").value = "";
-    document.getElementById("feedbackArea").style.display = "none";
-  } else {
-    document.getElementById("questionText").innerText = "Could not fetch question.";
-  }
+// ------------------------------------------------------
+// GET QUESTION
+// ------------------------------------------------------
+document.getElementById("getQuestionBtn").addEventListener("click", async () => {
+
+    const company = document.getElementById("company").value;
+    const round_type = document.getElementById("round_type").value;
+    const difficulty = document.getElementById("difficulty").value;
+
+    if (!company || !round_type || !difficulty) {
+        alert("Please select all filters!");
+        return;
+    }
+
+    const res = await fetch("/get_custom_question", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ company, round_type, difficulty })
+    });
+
+    const data = await res.json();
+
+    if (data.status === "success") {
+        currentQuestion = data;
+        document.getElementById("questionText").innerText = data.question;
+        document.getElementById("answerInput").value = "";
+        document.getElementById("feedbackArea").style.display = "none";
+    } else {
+        document.getElementById("questionText").innerText =
+            "No question found for this selection.";
+    }
+});
+
+
+// ------------------------------------------------------
+// SUBMIT ANSWER
+// ------------------------------------------------------
+document.getElementById("submitAnswerBtn").addEventListener("click", async () => {
+
+    if (!currentQuestion) {
+        alert("Please get a question first!");
+        return;
+    }
+
+    const answer = document.getElementById("answerInput").value.trim();
+    if (!answer) {
+        alert("Please enter your answer.");
+        return;
+    }
+
+    const res = await fetch("/analyse_answer", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+            question_id: currentQuestion.question_id,
+            answer: answer,
+            expected_keywords: currentQuestion.keywords || []
+        })
+    });
+
+    const result = await res.json();
+
+    const fb = document.getElementById("feedbackArea");
+    fb.style.display = "block";
+    fb.innerHTML = `<strong>Feedback:</strong><br>${result.final_feedback}`;
+
+    document.getElementById("saving").style.display = "inline";
+
+    await fetch("/save_progress", {
+        method: "POST",
+        headers: { "Content-Type":"application/json" },
+        body: JSON.stringify({
+            user_id: {{ session["user_id"] }},
+            question_id: currentQuestion.question_id,
+            answer: answer,
+            final_feedback: result.final_feedback,
+            score: result.keyword_score,
+            sentiment: result.sentiment_score,
+            keywords: currentQuestion.keywords || []
+        })
+    });
+
+    document.getElementById("saving").style.display = "none";
+    alert("Answer saved!");
+});
+
+</script>
+
+<style>
+
+.glass-wrapper {
+    display: flex;
+    justify-content: center;
+    padding-top: 25px;
 }
 
-document.getElementById("randBtn").addEventListener("click", getQuestion);
+.interview-card {
+    width: 92%;
+    max-width: 900px;
+    padding: 35px;
+    border-radius: 20px;
+    background: rgba(255,255,255,0.16);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255,255,255,0.3);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.20);
+}
 
-document.getElementById("subBtn").addEventListener("click", async () => {
-  if (!currentQuestion) { toast("Get a question first"); return; }
-  const ans = document.getElementById("answerBox").value || "";
+/* Titles */
+.practice-title,
+.practice-subtitle,
+.practice-highlight {
+    color: var(--accent-2) !important;
+    text-align: center;
+}
 
-  // Analyse
-  const resp = await fetch("/analyse_answer", {
-    method: "POST",
-    headers: {"Content-Type":"application/json"},
-    body: JSON.stringify({
-      question_id: currentQuestion.question_id,
-      answer: ans,
-      expected_keywords: currentQuestion.keywords || []
-    })
-  });
-  const result = await resp.json();
+body.dark .practice-title,
+body.dark .practice-subtitle,
+body.dark .practice-highlight {
+    color: #ffffff !important;
+}
 
-  // Show feedback
-  const fb = document.getElementById("feedbackArea");
-  fb.style.display = "block";
-  fb.innerHTML = `<strong>Feedback:</strong><br>${result.final_feedback}`;
+/* Filters row */
+.selector-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-bottom: 20px;
+    justify-content: center;
+}
 
-  // Save progress
-  document.getElementById("saving").style.display = "inline";
-  await fetch("/save_progress", {
-    method:"POST",
-    headers: {"Content-Type":"application/json"},
-    body: JSON.stringify({
-      user_id: 1,
-      question_id: currentQuestion.question_id,
-      answer: ans,
-      final_feedback: result.final_feedback,
-      score: result.keyword_score,
-      sentiment: result.sentiment_score,
-      keywords: currentQuestion.keywords || []
-    })
-  });
-  document.getElementById("saving").style.display = "none";
-  toast("Answer saved");
-});
-</script>
+/* Select dropdowns */
+.glass-select {
+    padding: 12px;
+    border-radius: 12px;
+    min-width: 160px;
+    background: rgba(255,255,255,0.4);
+    border: 1px solid rgba(255,255,255,0.3);
+    backdrop-filter: blur(12px);
+    color: #003b88;
+    font-weight: 500;
+}
+
+body.dark .glass-select {
+    background: rgba(30,30,30,0.4);
+    color: white;
+}
+
+/* Buttons */
+.glass-btn {
+    padding: 12px 20px;
+    border-radius: 12px;
+    background: linear-gradient(135deg,#1a73e8,#0d6efd);
+    color: white;
+    border: none;
+    cursor: pointer;
+    transition: 0.25s;
+}
+
+.glass-btn:hover {
+    transform: translateY(-2px);
+}
+
+/* Question display */
+.question-text {
+    font-size: 20px;
+    margin-bottom: 12px;
+}
+
+/* Answer textarea */
+.glass-input-area {
+    width: 100%;
+    padding: 14px;
+    min-height: 140px;
+    border-radius: 14px;
+    background: rgba(255,255,255,0.45);
+    border: 1px solid rgba(255,255,255,0.35);
+    backdrop-filter: blur(10px);
+    resize: vertical;
+    margin-bottom: 10px;
+}
+
+body.dark .glass-input-area {
+    background: rgba(30,30,30,0.45);
+    color: #fff;
+}
+
+/* Feedback box */
+.feedback-box {
+    margin-top: 12px;
+    padding: 15px;
+    border-radius: 12px;
+    background: rgba(255,255,255,0.35);
+    border-left: 4px solid #1a73e8;
+}
+
+body.dark .feedback-box {
+    background: rgba(30,30,30,0.35);
+    color: #fff;
+}
+
+</style>
+
 {% endblock %}

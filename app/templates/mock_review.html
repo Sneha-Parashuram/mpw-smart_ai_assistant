@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% block content %}
+
+<h1 style="text-align:center; margin-top:30px; font-weight:700;">Mock Interview Feedback</h1>
+
+<div style="max-width:95%; margin:30px auto;">
+
+<table style="width:100%; border-collapse: collapse; background:white; border-radius:14px; overflow:hidden;
+               box-shadow:0 8px 24px rgba(0,0,0,0.12);">
+
+    <thead>
+        <tr style="background:#1a73e8; color:white;">
+            <th style="padding:14px;">Question</th>
+            <th style="padding:14px;">Your Answer</th>
+            <th style="padding:14px;">Feedback</th>
+            <th style="padding:14px;">Score</th>
+            <th style="padding:14px;">Keywords</th>
+            <th style="padding:14px;">Time</th>
+        </tr>
+    </thead>
+
+    <tbody>
+        {% for fb in feedback_list %}
+        <tr style="border-bottom:1px solid #eee;">
+            <td style="padding:10px;">{{ fb.question }}</td>
+            <td style="padding:10px;">{{ fb.answer }}</td>
+            <td style="padding:10px;">{{ fb.feedback }}</td>
+            <td style="padding:10px; font-weight:600;">{{ fb.score }}</td>
+            <td style="padding:10px;">{{ fb.keywords }}</td>
+            <td style="padding:10px;">{{ fb.time }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+</div>
+
+{% endblock %}

@@ -8,6 +8,7 @@
 
     <!-- Stats / KPI Cards -->
     <div class="stats-grid">
+
         <div class="stat-card">
             <h3>Total Answers</h3>
             <p id="total-answers">0</p>
@@ -28,89 +29,106 @@
             <p id="avg-score">0</p>
         </div>
 
-        <div class="stat-card">
-            <h3>Avg Sentiment</h3>
-            <p id="avg-sent">0</p>
-        </div>
     </div>
 
     <!-- Charts -->
     <div class="chart-section">
-        <div class="chart-card">
-            <h3>Score Trend</h3>
-            <canvas id="scoreChart"></canvas>
-        </div>
 
         <div class="chart-card">
-            <h3>Sentiment Trend</h3>
-            <canvas id="sentChart"></canvas>
+            <h3>Score Trend</h3>
+            <canvas id="scoreChart" height="260"></canvas>
         </div>
 
         <div class="chart-card">
             <h3>Keyword Usage</h3>
-            <canvas id="keywordChart"></canvas>
+            <canvas id="keywordChart" height="260"></canvas>
         </div>
+
     </div>
 
 </div>
 
+
+<!-- Load Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
 <script>
 document.addEventListener("DOMContentLoaded", async () => {
+
     const userId = "{{ user_id }}";
 
+    // Fetch progress data
     const res = await fetch(`/get_progress/${userId}`);
     const data = await res.json();
 
     if (data.status !== "success") return;
 
+    // =====================
+    // Update KPI Cards
+    // =====================
     document.getElementById("total-answers").textContent = data.total_answers;
     document.getElementById("streak").textContent = data.streak;
     document.getElementById("points").textContent = data.points;
 
-    const avgScore = (data.scores.reduce((a,b)=>a+b,0) / data.scores.length || 0).toFixed(2);
-    const avgSent = (data.sentiment.reduce((a,b)=>a+b,0) / data.sentiment.length || 0).toFixed(2);
+    const avgScore = (
+        data.scores.reduce((a, b) => a + b, 0) / (data.scores.length || 1)
+    ).toFixed(2);
 
     document.getElementById("avg-score").textContent = avgScore;
-    document.getElementById("avg-sent").textContent = avgSent;
 
-    // SCORE CHART
+    // Color palette
+    const colors = {
+        blue: "rgba(13, 110, 253, 0.9)",
+        blueLight: "rgba(13, 110, 253, 0.25)",
+        orange: "rgba(255, 159, 64, 0.9)"
+    };
+
+    // =====================
+    // Score Trend Chart
+    // =====================
     new Chart(document.getElementById("scoreChart"), {
         type: "line",
         data: {
-            labels: data.scores.map((_,i)=>`Q${i+1}`),
+            labels: data.scores.map((_, i) => `Q${i + 1}`),
             datasets: [{
                 label: "Score",
                 data: data.scores,
-                borderWidth: 2
+                borderColor: colors.blue,
+                backgroundColor: colors.blueLight,
+                borderWidth: 3,
+                tension: 0.4,
+                fill: true,
+                pointRadius: 4,
+                pointBackgroundColor: colors.blue
             }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false
         }
     });
 
-    // SENTIMENT CHART
-    new Chart(document.getElementById("sentChart"), {
-        type: "line",
-        data: {
-            labels: data.sentiment.map((_,i)=>`Q${i+1}`),
-            datasets: [{
-                label: "Sentiment",
-                data: data.sentiment,
-                borderWidth: 2
-            }]
-        }
-    });
-
-    // KEYWORD COUNT CHART
+    // =====================
+    // Keyword Usage Chart
+    // =====================
     new Chart(document.getElementById("keywordChart"), {
         type: "bar",
         data: {
-            labels: data.keyword_counts.map((_,i)=>`Q${i+1}`),
+            labels: data.keyword_counts.map((_, i) => `Q${i + 1}`),
             datasets: [{
                 label: "Keywords Used",
                 data: data.keyword_counts,
+                backgroundColor: colors.orange,
+                borderColor: colors.orange,
                 borderWidth: 2
             }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false
         }
     });
+
 });
 </script>
 

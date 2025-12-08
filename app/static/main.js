@@ -60,3 +60,70 @@
   };
 
 })();
+/* ============= TOP BAR ============== */
+.top-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 14px 25px;
+}
+
+.top-left {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.top-profile-pic {
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.top-hello {
+    font-size: 18px;
+    font-weight: 700;
+}
+
+.top-right .brand-top {
+    font-size: 22px;
+    font-weight: 800;
+}
+
+/* ============= NAVBAR ============== */
+
+.site-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 25px;
+    background: #ffffff;
+    border-bottom: 1px solid #eee;
+}
+
+.nav-left .nav-profile {
+    font-weight: 700;
+    color: #000;
+}
+
+.nav-menu {
+    display: flex;
+    gap: 35px; /* pushes items apart */
+    margin-left: auto; /* pushes whole menu to right */
+}
+
+.nav-menu a {
+    text-decoration: none;
+    font-weight: 700;
+    color: #0f1724;
+}
+
+.logout-btn {
+    color: #000 !important;
+    font-weight: 800 !important;
+    margin-left: 30px !important; /* spacing after Dashboard */
+}
+
+/* Remove dark mode toggle fully */
+.mode-toggle { display: none !important; }

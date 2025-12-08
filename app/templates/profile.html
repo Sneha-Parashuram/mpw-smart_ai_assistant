@@ -1,0 +1,107 @@
+{% extends "base.html" %}
+{% block title %}Profile — SmartRecruit{% endblock %}
+
+{% block content %}
+
+<div class="profile-container">
+
+    <h1 class="page-title">Your Profile</h1>
+
+    {% if success %}
+    <div class="success-msg">{{ success }}</div>
+    {% endif %}
+
+    <!-- Profile Photo Preview -->
+    <div class="photo-box">
+        {% if user.profile_photo %}
+        <img src="{{ url_for('static', filename='uploads/photos/' + user.profile_photo) }}"
+             class="profile-photo-preview">
+        {% else %}
+        <div class="no-photo">No Photo</div>
+        {% endif %}
+    </div>
+
+    <!-- FORM -->
+    <form class="profile-form" method="POST" enctype="multipart/form-data">
+
+        <label>Upload New Profile Photo</label>
+        <input type="file" name="profile_photo" accept="image/*">
+
+        <label>First Name</label>
+        <input type="text" name="first_name" value="{{ user.first_name }}" required>
+
+        <label>Last Name</label>
+        <input type="text" name="last_name" value="{{ user.last_name }}" required>
+
+        <label>Email (cannot change)</label>
+        <input type="email" value="{{ user.email }}" disabled>
+
+        <label>Phone Number</label>
+        <input type="text" name="phone_number" value="{{ user.phone_number }}">
+
+        <label>Birthday</label>
+        <input type="date" name="birthday" value="{{ user.birthday }}">
+
+        <button type="submit" class="btn-main">Save Changes</button>
+    </form>
+
+</div>
+
+
+<style>
+.profile-container {
+    width: 70%;
+    margin: auto;
+    background: rgba(255,255,255,0.2);
+    padding: 30px;
+    border-radius: 15px;
+    backdrop-filter: blur(10px);
+}
+
+/* photo preview */
+.photo-box {
+    width: 140px;
+    height: 140px;
+    margin: 20px auto;
+    border-radius: 50%;
+    overflow: hidden;
+    background: rgba(255,255,255,0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.profile-photo-preview {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.no-photo {
+    font-size: 14px;
+    color: #333;
+}
+
+.profile-form {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.profile-form input {
+    padding: 10px;
+    border-radius: 10px;
+    border: 1px solid rgba(0,0,0,0.2);
+}
+
+.btn-main {
+    padding: 12px;
+    border-radius: 10px;
+    background: #1a73e8;
+    color: white;
+    border: none;
+    font-size: 16px;
+}
+</style>
+
+{% endblock %}

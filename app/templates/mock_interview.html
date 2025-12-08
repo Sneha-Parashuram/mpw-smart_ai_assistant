@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% block title %}Mock Interview{% endblock %}
+{% block content %}
+
+<h1 class="page-title">Mock Interview – 10 Questions</h1>
+
+<form id="mockForm">
+
+    {% for q in questions %}
+        <div class="card" style="margin-bottom:20px;">
+            <h3>Q{{ loop.index }}: {{ q.question }}</h3>
+
+            <textarea 
+                name="answer_{{ q.id }}" 
+                placeholder="Write your answer..." 
+                required></textarea>
+
+            <input type="hidden" name="qid_{{ q.id }}" value="{{ q.id }}">
+        </div>
+    {% endfor %}
+
+    <button class="btn-glass" type="submit">Submit All</button>
+</form>
+
+<script>
+document.getElementById("mockForm").addEventListener("submit", async function(event){
+    event.preventDefault();
+
+    const answers = [];
+
+    {% for q in questions %}
+        answers.push({
+            question_id: "{{ q.id }}",
+            answer: document.querySelector('textarea[name="answer_{{ q.id }}"]').value
+        });
+    {% endfor %}
+
+    const res = await fetch("/save_mock_progress", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify(answers)
+    });
+
+    const data = await res.json();
+
+    if (data.status === "success") {
+        window.location.href = "/mock_review/{{ session['user_id'] }}";
+    }
+});
+</script>
+
+{% endblock %}
