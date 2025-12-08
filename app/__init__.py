@@ -22,4 +22,12 @@ def create_app():
     app.register_blueprint(auth_bp)
     app.register_blueprint(main)
 
+    # 🔥 Auto-create tables if DB is empty
+    with app.app_context():
+        try:
+            db.create_all()
+            print("✓ Database tables ensured.")
+        except Exception as e:
+            print("⚠ Error creating tables:", e)
+
     return app

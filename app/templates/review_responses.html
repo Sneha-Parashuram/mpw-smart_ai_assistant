@@ -47,6 +47,9 @@
         border-bottom: 1px solid #e2e8f0;
         font-size: 14px;
         color: #333;
+        vertical-align: top;
+        white-space: normal;
+        word-wrap: break-word;
     }
 
     tr:hover {
@@ -68,7 +71,6 @@
             <th>Your Answer</th>
             <th>Feedback</th>
             <th>Score</th>
-            
             <th>Keywords</th>
             <th>Time</th>
         </tr>
@@ -79,9 +81,11 @@
         <tr>
             <td>{{ fb.question }}</td>
             <td>{{ fb.answer }}</td>
-            <td>{{ fb.feedback }}</td>
+
+            <!-- ⭐ NEW: Render formatted feedback -->
+            <td>{{ fb.feedback | safe }}</td>
+
             <td>{{ fb.score }}</td>
-            
             <td>{{ fb.keywords }}</td>
             <td>{{ fb.time }}</td>
         </tr>

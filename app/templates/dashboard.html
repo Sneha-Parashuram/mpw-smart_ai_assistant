@@ -29,6 +29,12 @@
             <p id="avg-score">0</p>
         </div>
 
+        <!-- ⭐ NEW KPI CARD: Mock Interview Count -->
+        <div class="stat-card">
+            <h3>Mock Interviews</h3>
+            <p id="mock-count">0</p>
+        </div>
+
     </div>
 
     <!-- Charts -->
@@ -75,6 +81,11 @@ document.addEventListener("DOMContentLoaded", async () => {
     ).toFixed(2);
 
     document.getElementById("avg-score").textContent = avgScore;
+
+    // ⭐ NEW: Mock interview attempts count
+    if (data.mock_interview_count !== undefined) {
+        document.getElementById("mock-count").textContent = data.mock_interview_count;
+    }
 
     // Color palette
     const colors = {

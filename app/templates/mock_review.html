@@ -1,12 +1,20 @@
 {% extends "base.html" %}
 {% block content %}
 
-<h1 style="text-align:center; margin-top:30px; font-weight:700;">Mock Interview Feedback</h1>
+<h1 style="text-align:center; margin-top:30px; font-weight:700;">
+    Mock Interview Feedback
+</h1>
 
 <div style="max-width:95%; margin:30px auto;">
 
-<table style="width:100%; border-collapse: collapse; background:white; border-radius:14px; overflow:hidden;
-               box-shadow:0 8px 24px rgba(0,0,0,0.12);">
+{% for interview_no, fb_list in groups.items() %}
+
+<h2 style="margin:25px 0; font-weight:700; color:#1a73e8;">
+    Mock Interview {{ interview_no }}
+</h2>
+
+<table style="width:100%; border-collapse: collapse; background:white; border-radius:14px; 
+               overflow:hidden; box-shadow:0 8px 24px rgba(0,0,0,0.12); margin-bottom:40px;">
 
     <thead>
         <tr style="background:#1a73e8; color:white;">
@@ -20,7 +28,7 @@
     </thead>
 
     <tbody>
-        {% for fb in feedback_list %}
+        {% for fb in fb_list %}
         <tr style="border-bottom:1px solid #eee;">
             <td style="padding:10px;">{{ fb.question }}</td>
             <td style="padding:10px;">{{ fb.answer }}</td>
@@ -31,7 +39,10 @@
         </tr>
         {% endfor %}
     </tbody>
+
 </table>
+
+{% endfor %}
 
 </div>
 
